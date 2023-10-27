@@ -36,12 +36,14 @@
 #' plot_bar(diamonds, by = "cut", by_position = "dodge")
 
 plot_bar <- function(data, with = NULL,
-                     by = NULL, by_position = "fill",
-                     maxcat = 50, order_bar = TRUE, binary_as_factor = TRUE,
-                     title = NULL,
-                     ggtheme = theme_gray(), theme_config = list(),
-                     nrow = 3L, ncol = 3L,
-                     parallel = FALSE) {
+                      by = NULL, by_position = "fill",
+                      maxcat = 50, order_bar = TRUE, binary_as_factor = TRUE,
+                      title = NULL,
+                      ggtheme = theme_gray(), theme_config = list(),
+                      nrow = 3L, ncol = 3L,
+                      parallel = FALSE,
+                      fill_colors = NULL,
+                      legend_title = NULL) {
   ## Declare variable first to pass R CMD check
   frequency <- measure <- variable <- value <- facet_value <- NULL
   ## Check if input is data.table
@@ -102,9 +104,16 @@ plot_bar <- function(data, with = NULL,
           geom_bar(stat = "identity") +
           ylab(ifelse(is.null(with), "Frequency", toTitleCase(with)))
       } else {
-        base_plot2 <- base_plot +
-          geom_bar(stat = "identity", aes_string(fill = by), position = by_position) +
-          ylab("")
+        if (is.null(fill_colors)) {
+          base_plot2 <- base_plot +
+            geom_bar(stat = "identity", aes_string(fill = by), position = by_position) +
+            ylab("")
+        } else {
+          base_plot2 <- base_plot +
+            geom_bar(stat = "identity", aes_string(fill = by), position = by_position) +
+            scale_fill_manual(values=fill_colors, name=legend_title) +
+            ylab("")
+        }
       }
       base_plot2 +
         scale_x_discrete(labels = function(x) tstrsplit(x, "___")[[1]]) +
